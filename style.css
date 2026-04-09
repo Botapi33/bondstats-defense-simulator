@@ -1,0 +1,62 @@
+body {
+    background: #0a0f1c;
+    color: white;
+    font-family: -apple-system, sans-serif;
+}
+
+.wrapper {
+    max-width: 900px;
+    margin: auto;
+    padding: 40px;
+}
+
+header h1 {
+    font-size: 32px;
+}
+
+.panel {
+    background: #111827;
+    padding: 20px;
+    border-radius: 10px;
+    margin-top: 20px;
+}
+
+.input-group {
+    margin-bottom: 15px;
+}
+
+input, select {
+    width: 100%;
+    padding: 10px;
+    background: #1f2937;
+    color: white;
+    border: none;
+}
+
+button {
+    width: 100%;
+    padding: 12px;
+    background: #f97316;
+    border: none;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.results {
+    margin-top: 30px;
+}
+
+.card {
+    background: #020617;
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+}
+
+.analysis {
+    margin-top: 20px;
+    background: #020617;
+    padding: 20px;
+    border-radius: 10px;
+    line-height: 1.6;
+}
