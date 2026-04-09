@@ -1,87 +1,64 @@
-const spendingSlider = document.getElementById("spending");
-const spendingValue = document.getElementById("spendingValue");
-
-spendingSlider.oninput = () => {
-    spendingValue.innerText = spendingSlider.value;
-};
-
 function runSimulation() {
 
-    let spending = parseInt(spendingSlider.value);
+    let spending = parseInt(document.getElementById("spending").value);
     let maturity = document.getElementById("maturity").value;
     let inflation = document.getElementById("inflation").value;
 
-    let pressure = getSupplyPressure(spending);
-    let yieldMove = getYieldDirection(pressure, inflation);
-    let curve = getCurveImpact(maturity, pressure, inflation);
-    let analysis = generateAnalysis(spending, maturity, inflation, pressure);
+    let pressureScore = calculatePressureScore(spending);
+    let inflationScore = inflation === "high" ? 30 : inflation === "moderate" ? 15 : 5;
 
-    document.getElementById("yieldBox").innerHTML =
-        `<strong>Yield Direction:</strong> ${yieldMove}`;
+    let totalScore = pressureScore + inflationScore;
 
-    document.getElementById("curveBox").innerHTML =
-        `<strong>Curve Impact:</strong> ${curve}`;
+    let yield = getYield(totalScore);
+    let curve = getCurve(maturity, totalScore);
+    let pressure = getPressureLabel(pressureScore);
 
-    document.getElementById("pressureBox").innerHTML =
-        `<strong>Supply Pressure:</strong> ${pressure}`;
-
-    document.getElementById("analysisBox").innerHTML = analysis;
+    renderBars(totalScore);
+    renderResults(yield, curve, pressure, totalScore);
 }
 
-// LOGIC MODULES
+// SCORE SYSTEM
 
-function getSupplyPressure(spending) {
-    if (spending > 200) return "High";
-    if (spending > 80) return "Moderate";
+function calculatePressureScore(spending) {
+    return Math.min(spending / 2, 70);
+}
+
+function getPressureLabel(score) {
+    if (score > 50) return "High";
+    if (score > 25) return "Moderate";
     return "Low";
 }
 
-function getYieldDirection(pressure, inflation) {
+// YIELD
 
-    if (pressure === "High" && inflation === "high") {
-        return "Strong Upward Pressure ↑";
-    }
-
-    if (pressure !== "Low") {
-        return "Moderate Upward Pressure ↑";
-    }
-
+function getYield(score) {
+    if (score > 60) return "Strong Upward Pressure ↑";
+    if (score > 30) return "Moderate Upward Pressure ↑";
     return "Neutral";
 }
 
-function getCurveImpact(maturity, pressure, inflation) {
+// CURVE
 
-    if (maturity === "long" && pressure !== "Low") {
-        return "Steepening";
-    }
-
-    if (inflation === "low" && maturity === "short") {
-        return "Flattening";
-    }
-
+function getCurve(maturity, score) {
+    if (maturity === "long" && score > 30) return "Steepening";
+    if (maturity === "short" && score < 20) return "Flattening";
     return "Neutral";
 }
 
-function generateAnalysis(spending, maturity, inflation, pressure) {
+// VISUALS
 
-    return `
-    <strong>Market Interpretation</strong><br><br>
+function renderBars(score) {
+    document.getElementById("scoreBar").style.width = score + "%";
+    document.getElementById("scoreValue").innerText = Math.round(score);
+}
 
-    A defense spending increase of $${spending}bn implies higher government borrowing needs,
-    leading to increased bond issuance.
+// OUTPUT
 
-    <br><br>
-
-    Supply pressure is assessed as <strong>${pressure}</strong>, which directly impacts yield formation.
-
-    <br><br>
-
-    ${maturity === "long" ? "A long-term issuance strategy concentrates pressure on the long end of the curve." : ""}
-
-    ${inflation === "high" ? "Elevated inflation expectations reinforce upward yield pressure and increase term premium sensitivity." : ""}
-
-    <br><br>
-
-    This simulation reflects structural dynamics rather than precise market forecasts.
+function renderResults(yield, curve, pressure, score) {
+    document.getElementById("results").innerHTML = `
+        <div class="metric"><b>Yield Direction:</b> ${yield}</div>
+        <div class="metric"><b>Curve Impact:</b> ${curve}</div>
+        <div class="metric"><b>Supply Pressure:</b> ${pressure}</div>
+        <div class="metric"><b>Bond Stress Score:</b> ${Math.round(score)}/100</div>
     `;
 }
