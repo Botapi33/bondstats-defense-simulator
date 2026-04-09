@@ -1,292 +1,209 @@
+
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
 <meta charset="UTF-8">
-<title>BondStats – Defense Bond Simulator</title>
+<title>BondStats Terminal</title>
 
 <style>
-
 body {
-    margin: 0;
-    font-family: Arial;
-    background: #05080f;
-    color: white;
+    background:#05080f;
+    color:white;
+    font-family:Arial;
+    margin:0;
 }
 
 .container {
-    max-width: 1400px;
-    margin: auto;
-    padding: 40px;
+    max-width:1600px;
+    margin:auto;
+    padding:40px;
 }
 
-h1 {
-    font-size: 48px;
-}
+h1 {font-size:48px;}
 
 .grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 30px;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:20px;
 }
 
 .panel {
-    background: #020617;
-    padding: 25px;
-    border-radius: 12px;
+    background:#020617;
+    padding:20px;
+    border-radius:10px;
 }
 
-label {
-    margin-top: 15px;
-    display: block;
-}
-
-input, select {
-    width: 100%;
-    padding: 12px;
-    margin-top: 5px;
-    background: #111827;
-    border: none;
-    color: white;
+select, input {
+    width:100%;
+    padding:10px;
+    margin-top:10px;
+    background:#111827;
+    color:white;
+    border:none;
 }
 
 button {
-    margin-top: 20px;
-    width: 100%;
-    padding: 15px;
-    background: #f97316;
-    border: none;
-    font-weight: bold;
-    cursor: pointer;
-}
-
-.metric {
-    margin-top: 15px;
+    margin-top:20px;
+    padding:15px;
+    width:100%;
+    background:#f97316;
+    border:none;
+    cursor:pointer;
 }
 
 .bar {
-    width: 100%;
-    height: 20px;
-    background: #111;
-    border-radius: 10px;
-    margin-top: 5px;
+    height:20px;
+    background:#111;
+    border-radius:10px;
 }
 
 .fill {
-    height: 100%;
-    width: 0%;
-    border-radius: 10px;
-    background: linear-gradient(90deg, green, orange, red);
+    height:100%;
+    width:0%;
+    background:linear-gradient(90deg,green,orange,red);
 }
 
-.analysis {
-    margin-top: 30px;
-    background: #020617;
-    padding: 20px;
-    border-radius: 12px;
-    line-height: 1.6;
+.metric {margin-top:15px;}
+
+.compare {
+    margin-top:30px;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:20px;
 }
 
-.driver-box {
-    margin-top: 20px;
+.delta {
+    margin-top:30px;
+    background:#020617;
+    padding:20px;
 }
 
 </style>
-</head>
 
+</head>
 <body>
 
 <div class="container">
 
-<h1>Defense Bond Simulator</h1>
-<p>Advanced scenario modeling for bond market dynamics</p>
+<h1>Defense Bond Terminal</h1>
 
 <div class="grid">
 
-<!-- INPUT -->
+<!-- SCENARIO A -->
 <div class="panel">
 
-<h2>Inputs</h2>
+<h2>Scenario A</h2>
 
-<label>Defense Spending ($bn)</label>
-<input type="range" id="spending" min="0" max="400" value="120">
-<span id="spendVal">120</span>
+<input type="range" id="sA" min="0" max="400" value="120">
 
-<label>Issuance</label>
-<select id="maturity">
+<select id="iA">
+<option value="low">Low Inflation</option>
+<option value="moderate">Moderate</option>
+<option value="high">High</option>
+</select>
+
+<select id="mA">
 <option value="short">Short</option>
 <option value="balanced">Balanced</option>
 <option value="long">Long</option>
 </select>
 
-<label>Inflation</label>
-<select id="inflation">
-<option value="low">Low</option>
+</div>
+
+<!-- SCENARIO B -->
+<div class="panel">
+
+<h2>Scenario B</h2>
+
+<input type="range" id="sB" min="0" max="400" value="200">
+
+<select id="iB">
+<option value="low">Low Inflation</option>
 <option value="moderate">Moderate</option>
 <option value="high">High</option>
 </select>
 
-<label>Central Bank</label>
-<select id="cb">
-<option value="dovish">Dovish</option>
-<option value="neutral">Neutral</option>
-<option value="hawkish">Hawkish</option>
+<select id="mB">
+<option value="short">Short</option>
+<option value="balanced">Balanced</option>
+<option value="long">Long</option>
 </select>
-
-<label>Safe Haven Demand</label>
-<select id="safe">
-<option value="low">Low</option>
-<option value="medium">Medium</option>
-<option value="high">High</option>
-</select>
-
-<label>Fiscal Credibility</label>
-<select id="fiscal">
-<option value="strong">Strong</option>
-<option value="weak">Weak</option>
-</select>
-
-<button onclick="run()">Run Simulation</button>
 
 </div>
 
-<!-- OUTPUT -->
+</div>
+
+<button onclick="run()">Compare Scenarios</button>
+
+<div class="compare">
+
 <div class="panel">
-
-<h2>Results</h2>
-
-<div class="metric">
-<b>Bond Stress Score</b>
-<div class="bar"><div class="fill" id="scoreBar"></div></div>
-<p id="scoreVal">0</p>
+<h3>Scenario A Output</h3>
+<div class="bar"><div id="barA" class="fill"></div></div>
+<p id="outA"></p>
 </div>
 
-<div class="metric"><b>Yield:</b> <span id="yield"></span></div>
-<div class="metric"><b>Curve:</b> <span id="curve"></span></div>
-<div class="metric"><b>Supply:</b> <span id="supply"></span></div>
-<div class="metric"><b>Term Premium:</b> <span id="term"></span></div>
-<div class="metric"><b>Volatility:</b> <span id="vol"></span></div>
-<div class="metric"><b>Duration Risk:</b> <span id="dur"></span></div>
-
+<div class="panel">
+<h3>Scenario B Output</h3>
+<div class="bar"><div id="barB" class="fill"></div></div>
+<p id="outB"></p>
 </div>
 
 </div>
 
-<div class="analysis" id="analysis"></div>
-
-<div class="driver-box" id="drivers"></div>
+<div class="delta" id="delta"></div>
 
 </div>
 
 <script>
 
-// SLIDER
-let slider = document.getElementById("spending");
-let val = document.getElementById("spendVal");
-
-slider.oninput = () => val.innerText = slider.value;
-
-// CORE ENGINE
-
-function run() {
-
-    let s = parseInt(slider.value);
-    let m = document.getElementById("maturity").value;
-    let i = document.getElementById("inflation").value;
-    let cb = document.getElementById("cb").value;
-    let safe = document.getElementById("safe").value;
-    let fiscal = document.getElementById("fiscal").value;
+function calc(s, i, m) {
 
     let score = s / 2;
 
-    let drivers = [];
+    if (i === "high") score += 25;
+    if (i === "moderate") score += 10;
 
-    // INFLATION
-    if (i === "high") {
-        score += 25;
-        drivers.push("High inflation → higher yield pressure");
-    }
-    if (i === "moderate") {
-        score += 10;
-        drivers.push("Moderate inflation → moderate pressure");
-    }
+    score = Math.min(score,100);
 
-    // CB
-    if (cb === "hawkish") {
-        score += 15;
-        drivers.push("Hawkish CB → yields rise");
-    }
-    if (cb === "dovish") {
-        score -= 10;
-        drivers.push("Dovish CB → dampens yields");
-    }
+    let yield = score > 60 ? "Strong ↑" :
+                score > 30 ? "Moderate ↑" : "Neutral";
 
-    // SAFE HAVEN
-    if (safe === "high") {
-        score -= 15;
-        drivers.push("High demand → yields suppressed");
-    }
-    if (safe === "low") {
-        score += 10;
-        drivers.push("Low demand → pressure rises");
-    }
-
-    // FISCAL
-    if (fiscal === "weak") {
-        score += 20;
-        drivers.push("Weak credibility → risk premium rises");
-    }
-
-    score = Math.max(0, Math.min(score, 100));
-
-    // OUTPUTS
-
-    let yield = score > 70 ? "Strong ↑" :
-                score > 40 ? "Moderate ↑" : "Neutral";
-
-    let curve = m === "long" && score > 40 ? "Steepening" :
+    let curve = m === "long" ? "Steepening" :
                 m === "short" ? "Flattening" : "Neutral";
 
-    let supply = score > 70 ? "High" :
-                 score > 40 ? "Moderate" : "Low";
+    return {score, yield, curve};
+}
 
-    let term = score > 60 ? "Rising" : "Stable";
+function run() {
 
-    let vol = score > 70 ? "High" :
-              score > 40 ? "Moderate" : "Low";
+    let A = calc(
+        parseInt(document.getElementById("sA").value),
+        document.getElementById("iA").value,
+        document.getElementById("mA").value
+    );
 
-    let dur = score > 60 ? "High Risk" :
-              score > 30 ? "Moderate" : "Low";
+    let B = calc(
+        parseInt(document.getElementById("sB").value),
+        document.getElementById("iB").value,
+        document.getElementById("mB").value
+    );
 
-    // RENDER
+    document.getElementById("barA").style.width = A.score + "%";
+    document.getElementById("barB").style.width = B.score + "%";
 
-    document.getElementById("scoreBar").style.width = score + "%";
-    document.getElementById("scoreVal").innerText = Math.round(score);
+    document.getElementById("outA").innerText =
+        A.yield + " | " + A.curve;
 
-    document.getElementById("yield").innerText = yield;
-    document.getElementById("curve").innerText = curve;
-    document.getElementById("supply").innerText = supply;
-    document.getElementById("term").innerText = term;
-    document.getElementById("vol").innerText = vol;
-    document.getElementById("dur").innerText = dur;
+    document.getElementById("outB").innerText =
+        B.yield + " | " + B.curve;
 
-    // ANALYSIS
+    let diff = B.score - A.score;
 
-    document.getElementById("analysis").innerHTML = `
-    A defense spending increase of $${s}bn leads to higher issuance.
-
-    Combined with ${i} inflation and ${cb} monetary policy,
-    the bond market stress score is ${Math.round(score)}.
-
-    This results in ${yield} yield pressure and ${curve} curve behavior.
+    document.getElementById("delta").innerHTML = `
+    <h3>Delta Analysis</h3>
+    Score Difference: ${diff}
     `;
-
-    // DRIVERS
-
-    let driverHTML = "<h3>Key Drivers</h3><ul>";
-    drivers.forEach(d => driverHTML += "<li>" + d + "</li>");
-    driverHTML += "</ul>";
-
-    document.getElementById("drivers").innerHTML = driverHTML;
 }
 
 </script>
