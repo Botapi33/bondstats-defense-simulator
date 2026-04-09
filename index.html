@@ -1,18 +1,20 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Defense Bond Simulator</title>
+<title>BondStats – Defense Bond Simulator</title>
 
 <style>
 
+/* BASE */
 body {
     margin:0;
-    font-family: Arial;
-    background:#05080f;
-    color:white;
+    font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: radial-gradient(circle at top, #0b1020, #05080f);
+    color:#e5e7eb;
 }
 
+/* LAYOUT */
 .container {
     max-width:1400px;
     margin:auto;
@@ -20,30 +22,43 @@ body {
 }
 
 h1 {
-    font-size:48px;
+    font-size:52px;
+    letter-spacing:-1px;
     margin-bottom:10px;
 }
 
-p.sub {
-    color:#aaa;
+.sub {
+    color:#9ca3af;
     margin-bottom:30px;
 }
 
+/* GRID */
 .grid {
     display:grid;
     grid-template-columns: 1.2fr 1fr;
     gap:30px;
 }
 
+/* PANELS */
 .panel {
-    background:#020617;
+    background:rgba(2,6,23,0.9);
+    backdrop-filter: blur(10px);
+    border:1px solid rgba(255,255,255,0.05);
     padding:25px;
-    border-radius:12px;
+    border-radius:14px;
+    transition:0.2s;
 }
 
+.panel:hover {
+    transform: translateY(-2px);
+}
+
+/* INPUTS */
 label {
     display:block;
     margin-top:18px;
+    font-size:14px;
+    color:#9ca3af;
 }
 
 input, select {
@@ -53,8 +68,10 @@ input, select {
     background:#111827;
     border:none;
     color:white;
+    border-radius:6px;
 }
 
+/* BUTTON */
 button {
     margin-top:25px;
     width:100%;
@@ -63,8 +80,15 @@ button {
     border:none;
     font-weight:bold;
     cursor:pointer;
+    border-radius:8px;
+    transition:0.2s;
 }
 
+button:hover {
+    background:#fb923c;
+}
+
+/* METRICS */
 .metric {
     margin-top:18px;
 }
@@ -81,23 +105,39 @@ button {
     height:100%;
     width:0%;
     border-radius:10px;
-    background:linear-gradient(90deg,#22c55e,#f97316,#ef4444);
+    transition:0.5s;
 }
 
-.analysis {
+/* TABS */
+.tabs {
+    display:flex;
+    gap:10px;
     margin-top:30px;
-    background:#020617;
-    padding:25px;
-    border-radius:12px;
-    line-height:1.7;
 }
 
-.drivers {
+.tab {
+    padding:10px 15px;
+    background:#111827;
+    cursor:pointer;
+    border-radius:6px;
+}
+
+.tab.active {
+    background:#f97316;
+}
+
+/* CONTENT */
+.content {
     margin-top:20px;
+    background:#020617;
+    padding:20px;
+    border-radius:12px;
+    line-height:1.6;
 }
 
-.drivers li {
-    margin-bottom:8px;
+/* DRIVERS */
+li {
+    margin-bottom:6px;
 }
 
 </style>
@@ -109,7 +149,7 @@ button {
 <div class="container">
 
 <h1>Defense Bond Simulator</h1>
-<p class="sub">A structured framework to model how defense spending affects bond markets</p>
+<p class="sub">Structured framework for analyzing defense-driven bond market dynamics</p>
 
 <div class="grid">
 
@@ -118,7 +158,7 @@ button {
 
 <h2>Scenario Inputs</h2>
 
-<label>Defense Spending Increase ($bn)</label>
+<label>Defense Spending ($bn)</label>
 <input type="range" id="spending" min="0" max="400" value="120">
 <span id="spVal">120</span>
 
@@ -182,101 +222,86 @@ button {
 
 </div>
 
-<div class="analysis" id="analysis"></div>
-
-<div class="analysis">
-<h3>Key Drivers</h3>
-<ul id="drivers"></ul>
+<!-- TABS -->
+<div class="tabs">
+<div class="tab active" onclick="switchTab('analysis')">Analysis</div>
+<div class="tab" onclick="switchTab('drivers')">Drivers</div>
 </div>
+
+<!-- CONTENT -->
+<div id="analysis" class="content"></div>
+<div id="drivers" class="content" style="display:none;"></div>
 
 </div>
 
 <script>
 
+// SLIDER
 let slider = document.getElementById("spending");
 let spVal = document.getElementById("spVal");
-
 slider.oninput = () => spVal.innerText = slider.value;
 
+// TAB SWITCH
+function switchTab(tab) {
+    document.getElementById("analysis").style.display = tab === "analysis" ? "block" : "none";
+    document.getElementById("drivers").style.display = tab === "drivers" ? "block" : "none";
+
+    document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+    event.target.classList.add("active");
+}
+
+// CORE
 function run() {
 
-    let s = parseInt(slider.value);
-    let m = document.getElementById("maturity").value;
-    let i = document.getElementById("inflation").value;
-    let cb = document.getElementById("cb").value;
-    let safe = document.getElementById("safe").value;
-    let fiscal = document.getElementById("fiscal").value;
+    let s = +slider.value;
+    let m = maturity.value;
+    let i = inflation.value;
+    let cbv = cb.value;
+    let safev = safe.value;
+    let fiscalv = fiscal.value;
 
-    let score = s * 0.4; // base weight
+    let score = s * 0.4;
     let drivers = [];
 
-    // Inflation
-    if (i === "high") { score += 25; drivers.push("High inflation increases yield pressure"); }
-    if (i === "moderate") { score += 12; drivers.push("Moderate inflation adds pressure"); }
+    if(i==="high"){score+=25;drivers.push("High inflation → upward yield pressure")}
+    if(i==="moderate"){score+=12;drivers.push("Moderate inflation → moderate pressure")}
 
-    // Central Bank
-    if (cb === "hawkish") { score += 15; drivers.push("Hawkish policy reinforces higher yields"); }
-    if (cb === "dovish") { score -= 10; drivers.push("Dovish policy dampens yield increases"); }
+    if(cbv==="hawkish"){score+=15;drivers.push("Hawkish policy → reinforces yields")}
+    if(cbv==="dovish"){score-=10;drivers.push("Dovish policy → dampens yields")}
 
-    // Safe Haven
-    if (safe === "high") { score -= 15; drivers.push("Strong demand offsets supply pressure"); }
-    if (safe === "low") { score += 10; drivers.push("Weak demand increases market stress"); }
+    if(safev==="high"){score-=15;drivers.push("Safe-haven demand offsets supply")}
+    if(safev==="low"){score+=10;drivers.push("Weak demand increases pressure")}
 
-    // Fiscal
-    if (fiscal === "weak") { score += 20; drivers.push("Weak fiscal credibility raises risk premium"); }
+    if(fiscalv==="weak"){score+=20;drivers.push("Weak fiscal credibility → higher risk premium")}
 
-    score = Math.max(0, Math.min(score, 100));
+    score=Math.max(0,Math.min(score,100));
 
-    // OUTPUT LOGIC
+    let regime = score<30?"Low Stress":score<60?"Moderate Stress":"High Stress";
 
-    let yield = score > 70 ? "Strong upward pressure" :
-                score > 40 ? "Moderate upward pressure" : "Neutral";
+    let bar = document.getElementById("scoreBar");
+    bar.style.width=score+"%";
+    bar.style.background=score<30?"#22c55e":score<60?"#f97316":"#ef4444";
 
-    let curve = m === "long" && score > 40 ? "Steepening" :
-                m === "short" ? "Flattening" : "Neutral";
+    scoreVal.innerText=Math.round(score)+" ("+regime+")";
 
-    let supply = score > 70 ? "High" :
-                 score > 40 ? "Moderate" : "Low";
+    yield.innerText=score>70?"Strong ↑":score>40?"Moderate ↑":"Neutral";
+    curve.innerText=m==="long"&&score>40?"Steepening":m==="short"?"Flattening":"Neutral";
+    supply.innerText=score>70?"High":score>40?"Moderate":"Low";
+    term.innerText=score>60?"Increasing":"Stable";
+    vol.innerText=score>70?"High":score>40?"Moderate":"Low";
+    dur.innerText=score>60?"High sensitivity":score>30?"Moderate":"Low";
 
-    let term = score > 60 ? "Increasing" : "Stable";
-
-    let vol = score > 70 ? "High" :
-              score > 40 ? "Moderate" : "Low";
-
-    let dur = score > 60 ? "High sensitivity" :
-              score > 30 ? "Moderate" : "Low";
-
-    // RENDER
-
-    document.getElementById("scoreBar").style.width = score + "%";
-    document.getElementById("scoreVal").innerText = Math.round(score);
-
-    document.getElementById("yield").innerText = yield;
-    document.getElementById("curve").innerText = curve;
-    document.getElementById("supply").innerText = supply;
-    document.getElementById("term").innerText = term;
-    document.getElementById("vol").innerText = vol;
-    document.getElementById("dur").innerText = dur;
-
-    // ANALYSIS TEXT (viel besser jetzt)
-
-    document.getElementById("analysis").innerHTML = `
-    A defense spending increase of $${s}bn leads to higher government borrowing and increased bond issuance.
-
-    The market impact depends on how supply interacts with expectations.
-
-    In this scenario, ${i} inflation and ${cb} monetary policy create a ${yield.toLowerCase()} environment.
-
-    Issuance structure (${m}) influences curve dynamics, resulting in a ${curve.toLowerCase()} outcome.
-
-    Overall, the bond market reflects a stress level of ${Math.round(score)}, driven by both supply pressure and macro expectations.
+    analysis.innerHTML=`
+    <strong>Market Interpretation</strong><br><br>
+    A defense expansion of $${s}bn increases issuance and supply pressure.
+    Combined with ${i} inflation and ${cbv} monetary policy, the market enters a <strong>${regime}</strong> environment.
+    The curve is ${curve.innerText.toLowerCase()}, with ${yield.innerText.toLowerCase()}.
     `;
 
-    // DRIVERS
-
-    let dHTML = "";
-    drivers.forEach(d => dHTML += "<li>" + d + "</li>");
-    document.getElementById("drivers").innerHTML = dHTML;
+    let dHTML="<ul>";
+    drivers.forEach(d=>dHTML+="<li>"+d+"</li>");
+    dHTML+="</ul>";
+    document.getElementById("drivers").innerHTML=dHTML;
 
 }
 
