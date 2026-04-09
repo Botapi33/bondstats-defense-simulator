@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>BondStats – Defense Simulator</title>
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<div class="wrapper">
+
+<header>
+<h1>Defense Bond Simulator</h1>
+<p>Model how fiscal expansion impacts bond markets</p>
+</header>
+
+<section class="panel">
+
+<div class="input-group">
+<label>Defense Spending Increase ($bn)</label>
+<input type="range" min="0" max="300" value="100" id="spending">
+<span id="spendingValue">100</span>
+</div>
+
+<div class="input-group">
+<label>Issuance Structure</label>
+<select id="maturity">
+<option value="short">Short-term</option>
+<option value="balanced">Balanced</option>
+<option value="long">Long-term</option>
+</select>
+</div>
+
+<div class="input-group">
+<label>Inflation Expectations</label>
+<select id="inflation">
+<option value="low">Low</option>
+<option value="moderate">Moderate</option>
+<option value="high">Elevated</option>
+</select>
+</div>
+
+<button onclick="runSimulation()">Run Simulation</button>
+
+</section>
+
+<section class="results">
+
+<div class="card" id="yieldBox"></div>
+<div class="card" id="curveBox"></div>
+<div class="card" id="pressureBox"></div>
+
+<div class="analysis" id="analysisBox"></div>
+
+</section>
+
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
